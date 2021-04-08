@@ -43,8 +43,8 @@ class StringMatcher:
                                        " Please try something with" +
                                        " characters.")
         self._pattern = pattern
-        self._bad_char_heuristic = self.rightmost_index_table(pattern)
-        self._good_suffix_heuristic = self._good_suffix(pattern)
+        self._bad_char_heuristic = self._rightmost_index_table(pattern)
+        self._good_suffix_heuristic = self._good_suffix()
 
     def naive(self, text):
         """Naive string matching algorithm (brute force).
@@ -162,8 +162,9 @@ class StringMatcher:
                                                         naive=naive)
             return doc_line_positions
 
+    # private methods #
     @staticmethod
-    def rightmost_index_table(pattern):
+    def _rightmost_index_table(pattern):
         """Retrieves rightmost index of each character which occurs in
         the pattern, e.g. for 'bob' the rightmost index of 'b' is 2 and
         of 'o' is 1.
@@ -191,18 +192,18 @@ class StringMatcher:
         for j in range(m - 1):  # without last index
             good_suffix = self._pattern[j+1:]  # at least one character
             # always left to j+1
-            rightmost_occ = self.rightmost_substr_start(good_suffix,
-                                                        self._pattern[:-1])
+            rightmost_occ = self._rightmost_substr_start(good_suffix,
+                                                         self._pattern[:-1])
             if rightmost_occ == -1:
-                shifts.append(self.start_of_longest_sfx_as_pfx(good_suffix,
-                                                               self._pattern))
+                shifts.append(self._start_of_longest_sfx_as_pfx(good_suffix,
+                                                                self._pattern))
                 continue
             shifts.append(j + 1 - rightmost_occ)
         shifts.append(1)  # if mismatch at last index (no good suffix)
         return shifts  # list containing ints > 0
 
     @staticmethod
-    def rightmost_substr_start(subpattern, pattern):
+    def _rightmost_substr_start(subpattern, pattern):
         """Finds starting index of rightmost occurrence of substring
         in pattern if existing.
 
@@ -221,7 +222,7 @@ class StringMatcher:
         return -1
 
     @staticmethod
-    def start_of_longest_sfx_as_pfx(suffix, pattern):
+    def _start_of_longest_sfx_as_pfx(suffix, pattern):
         """Determines starting index of longest suffix (of suffix) which
         is also a prefix of the pattern.
         
@@ -247,4 +248,3 @@ if __name__ == "__main__":
     sm = StringMatcher(pattern)
     print(sm.naive(text))
     print(sm.boyer_moore(text))
-    print(sm._good_suffix())
