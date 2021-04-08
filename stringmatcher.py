@@ -28,7 +28,13 @@ class StringMatcher:
 
     Attributes:
         pattern (str): String that is searched for.
-        TODO
+        bad_char_heuristic (dict): Mapping of characters (str) as keys
+            to indices (int) of their rightmost occurrence in the
+            pattern.
+        good_suffix_heuristic (list): Mapping of mismatch index to
+            number of shifts that can be made, on the basis of an
+            already matching suffix (= good suffix), without missing
+            possible alignments.
     """
     def __init__(self, pattern):
         if len(pattern) == 0:
@@ -41,7 +47,14 @@ class StringMatcher:
         self.good_suffix_heuristic = self._good_suffix(pattern)  # list
 
     def naive(self, text):
-        """Naive string matching algorithm (brute force)."""
+        """Naive string matching algorithm (brute force).
+
+        Args:
+            text (str): Text that is searched for a pattern.
+
+        Returns:
+            list: Contains the indices of the pattern's occurrences.
+        """
         m = len(self.pattern)
         positions = []
         for shift in range(len(text) - m + 1):
@@ -50,17 +63,28 @@ class StringMatcher:
         return positions
 
     def boyer_moore(self, text):
-        """According to the description by Cormen et al. (1990)."""
+        """Boyer-Moore (BM) string matching algorithm according to the
+        description by Cormen et al. (1990). In contrast to the naive
+        algorithm, this BM algorithm makes use of the pattern's
+        inner patterns to skip shifts and reduce the number of
+        comparisons to be made.
+        
+        Args:
+            text (str): Text that is searched for a pattern.
+
+        Returns:
+            list: Contains the indices of the pattern's occurrences.
+        """
         m = len(self.pattern)
         shift = 0
         positions = []
-        while shift <= len(text) - m:  # ok
+        while shift <= len(text) - m:
             j = m - 1  # last character in pattern
             while j > -1 and self.pattern[j] == text[shift+j]:
                 j -= 1
             if j == -1:  # complete match found
                 positions.append(shift)
-                shift += self.good_suffix_heuristic[0]  # mismatch at 0 or not does not make a difference since pattern passes this char anyway
+                shift += self.good_suffix_heuristic[0]
             else:  # mismatch at index j
                 shift += max(self.good_suffix_heuristic[j],
                              j - self.bad_char_heuristic.get(text[shift+j], -1))
@@ -160,7 +184,7 @@ class StringMatcher:
                 else -1.
         """
         m = len(subpattern)
-        for i in range(len(pattern)-m, -1, -1):  # naive string search
+        for i in range(len(pattern) - m, -1, -1):  # naive string search
             if subpattern == pattern[i:i+m]:
                 return i
         return -1
