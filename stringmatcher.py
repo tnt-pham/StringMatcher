@@ -9,6 +9,8 @@
 import logging
 import os
 
+from errors import EmptyStringException
+
 
 logging.basicConfig(filename="stringmatcher_log.log",
                     level=logging.INFO,
@@ -16,7 +18,22 @@ logging.basicConfig(filename="stringmatcher_log.log",
 
 
 class StringMatcher:
+    """Provides two string search algorithms to determine the positions
+    in a text.
+
+    Args:
+        pattern (str): String which should be searched for.
+
+    Attributes:
+        pattern (str): String which should be searched for.
+        TODO
+    """
     def __init__(self, pattern):
+        if len(pattern) == 0:
+            raise EmptyStringException("Invalid search string. Empty" +
+                                       " strings are everywhere." +
+                                       " Please try something with" +
+                                       " characters.")
         self.pattern = pattern
         self.bad_char_heuristic = self._rightmost_index(pattern)  # dict
         self.good_suffix_heuristic = self._good_suffix(pattern)  # list
@@ -47,6 +64,46 @@ class StringMatcher:
                              j - self.bad_char_heuristic.get(text[shift+j], -1))
         return positions
 
+
+    def search_file(self, filename, encoding="utf-8", boyer_moore=True):
+        line_positions = []  # filled with 2-tuples containing line number and a list of positions
+        try:
+            with open(filename, 'r', encoding=encoding) as read_f:
+                if boyer_moore:
+                    for num, line in enumerate(read_f, start=1):
+                        line_positions.append((num, self.boyer_moore(line)))
+                else:  # naive search
+                    for num, line in enumerate(read_f, start=1):
+                        line_positions.append((num, self.naive(line)))
+            return line_positions
+        except FileNotFoundError as fnf:
+            fnf_msg = filename + " does not exist. Valid file path needed."
+            logging.error(fnf_msg)
+            raise FileNotFoundError(fnf_msg).with_traceback(fnf.__traceback__)
+        except PermissionError as pe:
+            pe_msg = filename + " does not lead to a file."
+            logging.error(pe_msg)
+            raise FileNotFoundError(pe_msg).with_traceback(pe.__traceback__)
+
+    def search_dir(self, dirname, encoding="utf-8", boyer_moore=True):
+        doc_line_positions = dict()
+        try:  # maybe catch errors earlier?
+            for file in os.listdir(dirname):
+                filepath = os.path.join(dirname, file)
+                doc_line_positions[file] = self.search_file(filepath,
+                                                            encoding=encoding,
+                                                            boyer_moore=boyer_moore)
+            return doc_line_positions
+        except FileNotFoundError as fnf:
+            fnf_msg = dirname + " does not exist. Valid directory path needed."
+            logging.error(fnf_msg)
+            raise FileNotFoundError(fnf_msg).with_traceback(fnf.__traceback__)
+        except NotADirectoryError as nad:
+            nad_msg = dirname + " does not lead to a directory."
+            logging.error(nad_msg)
+            raise NotADirectoryError(nad_msg).with_traceback(nad.__traceback__)
+
+    # private methods #
     # okay
     def _rightmost_index(self, pattern):  # need alphabet?
         """Saves rightmost index of each character in the pattern."""
@@ -88,41 +145,6 @@ class StringMatcher:
                 return len(pattern) - len(suffix)
         return len(pattern)  # redundant
 
-    def search_file(self, filename, encoding="utf-8", boyer_moore=True):
-        line_positions = []  # filled with 2-tuples containing line number and a list of positions
-        try:
-            with open(filename, 'r', encoding=encoding) as read_f:
-                if boyer_moore:
-                    for num, line in enumerate(read_f, start=1):
-                        line_positions.append((num, self.boyer_moore(line)))
-                else:  # naive search
-                    for num, line in enumerate(read_f, start=1):
-                        line_positions.append((num, self.naive(line)))
-            return line_positions
-        except FileNotFoundError as fnf:
-            fnf_msg = filename + " does not exist. Valid file path needed."
-            logging.error(fnf_msg)
-            raise FileNotFoundError(fnf_msg).with_traceback(fnf.__traceback__)
-        except PermissionError as pe:
-            pe_msg = filename + " does not lead to a file."
-            logging.error(pe_msg)
-            raise FileNotFoundError(pe_msg).with_traceback(pe.__traceback__)
-
-    def search_dir(self, dirname, encoding="utf-8", boyer_moore=True):
-        doc_line_positions = dict()
-        try:  # maybe catch errors earlier?
-            for file in os.listdir(dirname):
-                filepath = os.path.join(dirname, file)
-                doc_line_positions[file] = self.search_file(filepath, encoding=encoding, boyer_moore=boyer_moore)
-            return doc_line_positions
-        except FileNotFoundError as fnf:
-            fnf_msg = dirname + " does not exist. Valid directory path needed."
-            logging.error(fnf_msg)
-            raise FileNotFoundError(fnf_msg).with_traceback(fnf.__traceback__)
-        except NotADirectoryError as nad:
-            nad_msg = dirname + " does not lead to a directory."
-            logging.error(nad_msg)
-            raise NotADirectoryError(nad_msg).with_traceback(nad.__traceback__)
 
 
 
@@ -158,7 +180,7 @@ class StringMatcher:
 
 if __name__ == "__main__":
     pattern = "holala"
-    text = "he holala hallo hola hola hola ha holalalaho hos hola hola holala"
+    text = "he holala hallo hola hola hola\n ha holalalaho hos hola hola holala"
     sm = StringMatcher(pattern)
     print(sm.naive(text))
     print(sm.boyer_moore(text))
