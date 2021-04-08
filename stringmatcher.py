@@ -86,12 +86,16 @@ class StringMatcher:
                 return len(pattern) - len(suffix)
         return len(pattern)  # redundant
 
-    def search_file(self, pattern, filename, encoding="utf-8"):
-        line_positions = []
+    def search_file(self, pattern, filename, encoding="utf-8", boyer_moore=True):
+        line_positions = []  # filled with 2-tuples containing line number and a list of positions
         try:
             with open(filename, 'r', encoding=encoding) as read_f:
-                for num, line in enumerate(read_f, start=1):
-                    line_positions.append((num, self.boyer_moore(line, pattern)))
+                if boyer_moore:
+                    for num, line in enumerate(read_f, start=1):
+                        line_positions.append((num, self.boyer_moore(pattern, line)))
+                else:  # naive search
+                    for num, line in enumerate(read_f, start=1):
+                        line_positions.append((num, self.naive(pattern, line)))
             return line_positions
         except FileNotFoundError as fnf:
             fnf_msg = filename + " does not exist. Valid file path needed."
@@ -102,12 +106,13 @@ class StringMatcher:
             logging.error(pe_msg)
             raise FileNotFoundError(pe_msg).with_traceback(pe.__traceback__)
 
-    def search_dir(self, pattern, dirname, encoding="utf-8"):
+    def search_dir(self, pattern, dirname, encoding="utf-8", boyer_moore=True):
         doc_line_positions = dict()
         try:
             for file in os.listdir(dirname):
                 filepath = os.path.join(dirname, file)
-                doc_line_positions[file] = search_file(pattern, filepath, encoding=encoding)
+                doc_line_positions[file] = search_file(pattern, filepath, encoding=encoding, boyer_moore=boyer_moore)
+            return doc_line_positions
         except FileNotFoundError as fnf:
             fnf_msg = dirname + " does not exist. Valid directory path needed."
             logging.error(fnf_msg)
