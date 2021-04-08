@@ -42,9 +42,9 @@ class StringMatcher:
                                        " strings are everywhere." +
                                        " Please try something with" +
                                        " characters.")
-        self.pattern = pattern
-        self.bad_char_heuristic = self.rightmost_index_table(pattern)  # dict
-        self.good_suffix_heuristic = self._good_suffix(pattern)  # list
+        self._pattern = pattern
+        self._bad_char_heuristic = self.rightmost_index_table(pattern)
+        self._good_suffix_heuristic = self._good_suffix(pattern)
 
     def naive(self, text):
         """Naive string matching algorithm (brute force).
@@ -55,10 +55,10 @@ class StringMatcher:
         Returns:
             list: Contains the indices of the pattern's occurrences.
         """
-        m = len(self.pattern)
+        m = len(self._pattern)
         positions = []
         for shift in range(len(text) - m + 1):
-            if self.pattern == text[shift:shift+m]:
+            if self._pattern == text[shift:shift+m]:
                 positions.append(shift)
         return positions
 
@@ -75,59 +75,88 @@ class StringMatcher:
         Returns:
             list: Contains the indices of the pattern's occurrences.
         """
-        m = len(self.pattern)
+        m = len(self._pattern)
         shift = 0
         positions = []
         while shift <= len(text) - m:
             j = m - 1  # last character in pattern
-            while j > -1 and self.pattern[j] == text[shift+j]:
+            while j > -1 and self._pattern[j] == text[shift+j]:
                 j -= 1
             if j == -1:  # complete match found
                 positions.append(shift)
-                shift += self.good_suffix_heuristic[0]
+                shift += self._good_suffix_heuristic[0]
             else:  # mismatch at index j
-                shift += max(self.good_suffix_heuristic[j],
-                             j - self.bad_char_heuristic.get(text[shift+j], -1))
+                shift += max(
+                    self._good_suffix_heuristic[j],
+                    j - self._bad_char_heuristic.get(text[shift+j], -1))  ############################################################ TODO
         return positions
 
+    def search_file(self, file, encoding="utf-8", naive=False):
+        """Searches file for occurrences of a string.
 
-    def search_file(self, filename, encoding="utf-8", boyer_moore=True):
-        # filled with 2-tuples of line number and a list of positions
-        # e.g. for findings in line 2 and 56: [(2, [23, 41, 75]), (56, [45])]
+        Args:
+            file (str): Path to the file which is to be searched for
+                a particular string.
+            encoding (str): File encoding. Defaults to utf-8.
+
+        Returns:
+            list: Contains 2-tuples consisting of a line number and a
+                list of positions (int) in that line, e.g. for findings
+                in line 2 and 56: [(2, [23, 41, 75]), (56, [45])].
+        """
         line_positions = []
         try:
-            with open(filename, 'r', encoding=encoding) as read_f:
-                if boyer_moore:
-                    for num, line in enumerate(read_f, start=1):
-                        line_positions.append((num, self.boyer_moore(line)))
-                else:  # naive search
+            with open(file, 'r', encoding=encoding) as read_f:
+                if naive:
                     for num, line in enumerate(read_f, start=1):
                         line_positions.append((num, self.naive(line)))
+                else:  # BM algorithm
+                    for num, line in enumerate(read_f, start=1):
+                        line_positions.append((num, self.boyer_moore(line)))
             return line_positions
         except FileNotFoundError as fnf:
-            fnf_msg = filename + " does not exist. Valid file path needed."
+            fnf_msg = file + " does not exist. Valid file path needed."
             logging.error(fnf_msg)
             raise FileNotFoundError(fnf_msg).with_traceback(fnf.__traceback__)
         except PermissionError as pe:
-            pe_msg = filename + " does not lead to a file."
+            pe_msg = file + " does not lead to a file."
             logging.error(pe_msg)
             raise FileNotFoundError(pe_msg).with_traceback(pe.__traceback__)
 
-    def search_dir(self, dirname, encoding="utf-8", boyer_moore=True):
+    def search_dir(self, dir, encoding="utf-8", naive=False):
+        """Searches every file in a directory for occurrences of a
+        string.
+
+        Args:
+            dir (str): Path to the directory of which every containing
+                file is searched for a particular string.
+            encoding (str): Encoding of the files in the directory.
+                Defaults to utf-8.
+            naive (bool): Naive search algorithm is used if True, else
+                BM algorithm.
+
+        Returns:
+            dict: Each key is a filename and each value a list of
+                2-tuples. These 2-tuples consist of a line number (int)
+                and a list of positions (int) in that line, e.g. for
+                findings in 'essay.txt' in line 2 and 56:
+                {'essay.txt': [(2, [23, 41, 75]), (56, [45])],
+                 'next_article.txt': ...}
+        """
         doc_line_positions = dict()
-        try:  # maybe catch errors earlier?
-            for file in tqdm(os.listdir(dirname), desc="search directory..."):
-                filepath = os.path.join(dirname, file)
+        try:  # os.listdir vorher speichern in try, rest außerhalb
+            for file in tqdm(os.listdir(dir), desc="search directory..."):
+                filepath = os.path.join(dir, file)
                 doc_line_positions[file] = self.search_file(filepath,
                                                             encoding=encoding,
-                                                            boyer_moore=boyer_moore)
+                                                            naive=naive)
             return doc_line_positions
         except FileNotFoundError as fnf:
-            fnf_msg = dirname + " does not exist. Valid directory path needed."
+            fnf_msg = dir + " does not exist. Valid directory path needed."
             logging.error(fnf_msg)
             raise FileNotFoundError(fnf_msg).with_traceback(fnf.__traceback__)
         except NotADirectoryError as nad:
-            nad_msg = dirname + " does not lead to a directory."
+            nad_msg = dir + " does not lead to a directory."
             logging.error(nad_msg)
             raise NotADirectoryError(nad_msg).with_traceback(nad.__traceback__)
 
@@ -156,15 +185,15 @@ class StringMatcher:
         suffix (= good suffix).
         """
         shifts = []
-        m = len(self.pattern)
+        m = len(self._pattern)
         for j in range(m - 1):  # without last index
-            good_suffix = self.pattern[j+1:]  # at least one character
+            good_suffix = self._pattern[j+1:]  # at least one character
             # always left to j+1
             rightmost_occ = self.rightmost_substr_start(good_suffix,
-                                                        self.pattern[:-1])
+                                                        self._pattern[:-1])
             if rightmost_occ == -1:
                 shifts.append(self.start_of_longest_sfx_as_pfx(good_suffix,
-                                                               self.pattern))
+                                                               self._pattern))
                 continue
             shifts.append(j + 1 - rightmost_occ)
         shifts.append(1)  # if mismatch at last index (no good suffix)
