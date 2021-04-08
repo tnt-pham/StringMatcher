@@ -88,7 +88,8 @@ class StringMatcher:
             else:  # mismatch at index j
                 shift += max(
                     self._good_suffix_heuristic[j],
-                    j - self._bad_char_heuristic.get(text[shift+j], -1))  ############################################################ TODO
+                    j - self._bad_char_heuristic.get(text[shift+j], -1)
+                    )
         return positions
 
     def search_file(self, file, encoding="utf-8", naive=False):
@@ -144,13 +145,8 @@ class StringMatcher:
                  'next_article.txt': ...}
         """
         doc_line_positions = dict()
-        try:  # os.listdir vorher speichern in try, rest außerhalb
-            for file in tqdm(os.listdir(dir), desc="search directory..."):
-                filepath = os.path.join(dir, file)
-                doc_line_positions[file] = self.search_file(filepath,
-                                                            encoding=encoding,
-                                                            naive=naive)
-            return doc_line_positions
+        try:
+            file_list = os.listdir(dir)
         except FileNotFoundError as fnf:
             fnf_msg = dir + " does not exist. Valid directory path needed."
             logging.error(fnf_msg)
@@ -159,6 +155,12 @@ class StringMatcher:
             nad_msg = dir + " does not lead to a directory."
             logging.error(nad_msg)
             raise NotADirectoryError(nad_msg).with_traceback(nad.__traceback__)
+        for file in tqdm(file_list, desc="search directory..."):
+            filepath = os.path.join(dir, file)
+            doc_line_positions[file] = self.search_file(filepath,
+                                                        encoding=encoding,
+                                                        naive=naive)
+            return doc_line_positions
 
     @staticmethod
     def rightmost_index_table(pattern):
@@ -237,35 +239,6 @@ class StringMatcher:
             # at the latest fulfilled in case of empty string
             if pattern.startswith(suffix):
                 return len(pattern) - len(suffix)
-
-
-
-
-# def _good_suffix_heuristic(pattern):
-#     longest_prefix = _prefix(pattern)
-#     longest_prefix_reversed = _prefix(pattern[::-1])
-#     m = len(pattern)
-#     good_suffix = dict()
-#     for j in range(m):
-#         good_suffix[j] = m - longest_prefix[m - 1]
-#     for l in range(1, m):
-#         j = m - longest_prefix_reversed[l] - 1
-#         if good_suffix[j] > l - longest_prefix_reversed[l]:
-#             good_suffix[j] = l - longest_prefix_reversed[l]
-#     return good_suffix
-
-
-# # okay maybe
-# def _prefix(pattern):
-#     longest_prefix = {0: 0}  # len of longest prefix that is suffix for pattern[:key]
-#     k = 0
-#     for q in range(1, len(pattern)):
-#         while k > 0 and pattern[k] != pattern[q]:
-#             k = longest_prefix[k - 1]  # k-1???
-#         if pattern[k] == pattern[q]:
-#             k += 1
-#         longest_prefix[q] = k
-#     return longest_prefix
 
 
 if __name__ == "__main__":
