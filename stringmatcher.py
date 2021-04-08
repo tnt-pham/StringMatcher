@@ -10,39 +10,41 @@ import logging
 import os
 
 
-logging.basicConfig(filename="stringmatching_log.log",
+logging.basicConfig(filename="stringmatcher_log.log",
                     level=logging.INFO,
                     format="%(levelname)s:%(asctime)s:%(message)s")
 
 
 class StringMatcher:
+    def __init__(self, pattern):
+        self.pattern = pattern
+        self.bad_char_heuristic = self._rightmost_index(pattern)  # dict
+        self.good_suffix_heuristic = self._good_suffix(pattern)  # list
 
-    def naive(self, pattern, text):
+    def naive(self, text):
         """Naive string matching algorithm (brute force)."""
-        m = len(pattern)
+        m = len(self.pattern)
         positions = []
         for shift in range(len(text) - m + 1):
-            if pattern == text[shift:shift+m]:
+            if self.pattern == text[shift:shift+m]:
                 positions.append(shift)
         return positions
 
-    def boyer_moore(self, pattern, text):
+    def boyer_moore(self, text):
         """According to the description by Cormen et al. (1990)."""
-        bad_character = self._rightmost_index(pattern)  # dict
-        good_suffix = self._good_suffix(pattern)  # list
-        m = len(pattern)
+        m = len(self.pattern)
         shift = 0
         positions = []
         while shift <= len(text) - m:  # ok
             j = m - 1  # last character in pattern
-            while j > -1 and pattern[j] == text[shift+j]:
+            while j > -1 and self.pattern[j] == text[shift+j]:
                 j -= 1
             if j == -1:  # complete match found
                 positions.append(shift)
-                shift += good_suffix[0]  # TODO
+                shift += self.good_suffix_heuristic[0]  # mismatch at 0 or not does not make a difference since pattern passes this char anyway
             else:  # mismatch at index j
-                shift += max(good_suffix[j],
-                             j - bad_character.get(text[shift+j], -1))
+                shift += max(self.good_suffix_heuristic[j],
+                             j - self.bad_char_heuristic.get(text[shift+j], -1))
         return positions
 
     # okay
@@ -53,16 +55,16 @@ class StringMatcher:
             rightmost_index[pattern[j]] = j
         return rightmost_index
 
-    def _good_suffix(self, pattern):  # always return > 0
+    def _good_suffix(self):  # always return > 0
         """Maps mismatch index to number of shifts that can be made
         without missing possible alignments of the matching suffix."""
         shifts = []  # maps indices of mismatches to valid shifts
-        m = len(pattern)
+        m = len(self.pattern)
         for j in range(m - 1):  # bis vorletzen?
-            good_suffix = pattern[j+1:]  # at least one character
-            rightmost_occurrence = self._rightmost_start_of_substr(good_suffix, pattern[:-1])  # always left to j+1
+            good_suffix = self.pattern[j+1:]  # at least one character
+            rightmost_occurrence = self._rightmost_start_of_substr(good_suffix, self.pattern[:-1])  # always left to j+1
             if rightmost_occurrence == -1:
-                shifts.append(self._start_of_longest_sfx_as_pfx(good_suffix, pattern))
+                shifts.append(self._start_of_longest_sfx_as_pfx(good_suffix, self.pattern))
                 continue
             shifts.append(j + 1 - rightmost_occurrence)  # always positive
         shifts.append(1)  # shift 1 if rightmost character mismatches (no good suffix)
@@ -86,16 +88,16 @@ class StringMatcher:
                 return len(pattern) - len(suffix)
         return len(pattern)  # redundant
 
-    def search_file(self, pattern, filename, encoding="utf-8", boyer_moore=True):
+    def search_file(self, filename, encoding="utf-8", boyer_moore=True):
         line_positions = []  # filled with 2-tuples containing line number and a list of positions
         try:
             with open(filename, 'r', encoding=encoding) as read_f:
                 if boyer_moore:
                     for num, line in enumerate(read_f, start=1):
-                        line_positions.append((num, self.boyer_moore(pattern, line)))
+                        line_positions.append((num, self.boyer_moore(line)))
                 else:  # naive search
                     for num, line in enumerate(read_f, start=1):
-                        line_positions.append((num, self.naive(pattern, line)))
+                        line_positions.append((num, self.naive(line)))
             return line_positions
         except FileNotFoundError as fnf:
             fnf_msg = filename + " does not exist. Valid file path needed."
@@ -106,12 +108,12 @@ class StringMatcher:
             logging.error(pe_msg)
             raise FileNotFoundError(pe_msg).with_traceback(pe.__traceback__)
 
-    def search_dir(self, pattern, dirname, encoding="utf-8", boyer_moore=True):
+    def search_dir(self, dirname, encoding="utf-8", boyer_moore=True):
         doc_line_positions = dict()
-        try:
+        try:  # maybe catch errors earlier?
             for file in os.listdir(dirname):
                 filepath = os.path.join(dirname, file)
-                doc_line_positions[file] = search_file(pattern, filepath, encoding=encoding, boyer_moore=boyer_moore)
+                doc_line_positions[file] = self.search_file(filepath, encoding=encoding, boyer_moore=boyer_moore)
             return doc_line_positions
         except FileNotFoundError as fnf:
             fnf_msg = dirname + " does not exist. Valid directory path needed."
@@ -157,7 +159,7 @@ class StringMatcher:
 if __name__ == "__main__":
     pattern = "holala"
     text = "he holala hallo hola hola hola ha holalalaho hos hola hola holala"
-    sm = StringMatcher()
-    print(sm.naive(pattern, text))
-    print(sm.boyer_moore(pattern, text))
-    print(sm._good_suffix("ababbabacab"))
+    sm = StringMatcher(pattern)
+    print(sm.naive(text))
+    print(sm.boyer_moore(text))
+    print(sm._good_suffix())
