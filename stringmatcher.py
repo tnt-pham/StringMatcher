@@ -44,7 +44,7 @@ class StringMatcher:
                                        " characters.")
         self._pattern = pattern
         self._bad_char_heuristic = self._rightmost_index_table(pattern)
-        self._good_suffix_heuristic = self._good_suffix()
+        self._good_suffix_heuristic = self._good_suffix_shifts()
 
     def naive(self, text):
         """Naive string matching algorithm (brute force).
@@ -66,9 +66,9 @@ class StringMatcher:
         """Boyer-Moore (BM) string matching algorithm according to the
         description by Cormen et al. (1990). In contrast to the naive
         algorithm, this BM algorithm makes use of the pattern's
-        inner patterns to skip shifts and reduce the number of
+        inner patterns/structure to skip shifts and reduce the number of
         comparisons to be made.
-        
+
         Args:
             text (str): Text that is searched for a pattern.
 
@@ -162,7 +162,7 @@ class StringMatcher:
                                                         naive=naive)
             return doc_line_positions
 
-    # private methods #
+# private methods #
     @staticmethod
     def _rightmost_index_table(pattern):
         """Retrieves rightmost index of each character which occurs in
@@ -182,23 +182,23 @@ class StringMatcher:
             char_index_table[pattern[j]] = j
         return char_index_table
 
-    def _good_suffix(self):
+    def _good_suffix_shifts(self):
         """Maps mismatch index to number of shifts that can be made
         without missing possible alignments of the already matching
         suffix (= good suffix).
         """
         shifts = []
         m = len(self._pattern)
-        for j in range(m - 1):  # without last index
+        for j in range(m - 1):
             good_suffix = self._pattern[j+1:]  # at least one character
-            # always left to j+1
+            # always to the left of j+1
             rightmost_occ = self._rightmost_substr_start(good_suffix,
                                                          self._pattern[:-1])
-            if rightmost_occ == -1:
+            if rightmost_occ == -1:  # not found
                 shifts.append(self._start_of_longest_sfx_as_pfx(good_suffix,
                                                                 self._pattern))
-                continue
-            shifts.append(j + 1 - rightmost_occ)
+            else:
+                shifts.append(j + 1 - rightmost_occ)
         shifts.append(1)  # if mismatch at last index (no good suffix)
         return shifts  # list containing ints > 0
 
@@ -225,7 +225,7 @@ class StringMatcher:
     def _start_of_longest_sfx_as_pfx(suffix, pattern):
         """Determines starting index of longest suffix (of suffix) which
         is also a prefix of the pattern.
-        
+
         Args:
             suffix (str): Suffix of pattern of which the longest suffix
                 is ascertained.
@@ -244,7 +244,7 @@ class StringMatcher:
 
 if __name__ == "__main__":
     pattern = "holala"
-    text = "he holala hallo hola hola hola\n ha holalalaho hos hola hola holala"
+    text = "he holala hallo hola hola hola\n ha holalalahohos hola hola holala"
     sm = StringMatcher(pattern)
     print(sm.naive(text))
     print(sm.boyer_moore(text))
