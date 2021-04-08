@@ -9,6 +9,8 @@
 import logging
 import os
 
+from tqdm import tqdm
+
 from errors import EmptyStringException
 
 
@@ -22,10 +24,10 @@ class StringMatcher:
     in a text.
 
     Args:
-        pattern (str): String which should be searched for.
+        pattern (str): String that is searched for.
 
     Attributes:
-        pattern (str): String which should be searched for.
+        pattern (str): String that is searched for.
         TODO
     """
     def __init__(self, pattern):
@@ -35,7 +37,7 @@ class StringMatcher:
                                        " Please try something with" +
                                        " characters.")
         self.pattern = pattern
-        self.bad_char_heuristic = self._rightmost_index(pattern)  # dict
+        self.bad_char_heuristic = self.rightmost_index_table(pattern)  # dict
         self.good_suffix_heuristic = self._good_suffix(pattern)  # list
 
     def naive(self, text):
@@ -66,7 +68,9 @@ class StringMatcher:
 
 
     def search_file(self, filename, encoding="utf-8", boyer_moore=True):
-        line_positions = []  # filled with 2-tuples containing line number and a list of positions
+        # filled with 2-tuples of line number and a list of positions
+        # e.g. for findings in line 2 and 56: [(2, [23, 41, 75]), (56, [45])]
+        line_positions = []
         try:
             with open(filename, 'r', encoding=encoding) as read_f:
                 if boyer_moore:
@@ -88,7 +92,7 @@ class StringMatcher:
     def search_dir(self, dirname, encoding="utf-8", boyer_moore=True):
         doc_line_positions = dict()
         try:  # maybe catch errors earlier?
-            for file in os.listdir(dirname):
+            for file in tqdm(os.listdir(dirname), desc="search directory..."):
                 filepath = os.path.join(dirname, file)
                 doc_line_positions[file] = self.search_file(filepath,
                                                             encoding=encoding,
@@ -103,47 +107,83 @@ class StringMatcher:
             logging.error(nad_msg)
             raise NotADirectoryError(nad_msg).with_traceback(nad.__traceback__)
 
-    # private methods #
-    # okay
-    def _rightmost_index(self, pattern):  # need alphabet?
-        """Saves rightmost index of each character in the pattern."""
-        rightmost_index = dict()  # rename?
+    @staticmethod
+    def rightmost_index_table(pattern):
+        """Retrieves rightmost index of each character which occurs in
+        the pattern, e.g. for 'bob' the rightmost index of 'b' is 2 and
+        of 'o' is 1.
+
+        Args:
+            pattern (str): String of which the characters's rightmost
+                indices are retrieved.
+
+        Return:
+            dict: Contains characters (str) as keys and indices (int)
+                as values.
+        """
+        char_index_table = dict()
         for j in range(len(pattern)):
-            rightmost_index[pattern[j]] = j
-        return rightmost_index
+            char_index_table[pattern[j]] = j
+        return char_index_table
 
-    def _good_suffix(self):  # always return > 0
+    def _good_suffix(self):
         """Maps mismatch index to number of shifts that can be made
-        without missing possible alignments of the matching suffix."""
-        shifts = []  # maps indices of mismatches to valid shifts
+        without missing possible alignments of the already matching
+        suffix (= good suffix).
+        """
+        shifts = []
         m = len(self.pattern)
-        for j in range(m - 1):  # bis vorletzen?
+        for j in range(m - 1):  # without last index
             good_suffix = self.pattern[j+1:]  # at least one character
-            rightmost_occurrence = self._rightmost_start_of_substr(good_suffix, self.pattern[:-1])  # always left to j+1
-            if rightmost_occurrence == -1:
-                shifts.append(self._start_of_longest_sfx_as_pfx(good_suffix, self.pattern))
+            # always left to j+1
+            rightmost_occ = self.rightmost_substr_start(good_suffix,
+                                                        self.pattern[:-1])
+            if rightmost_occ == -1:
+                shifts.append(self.start_of_longest_sfx_as_pfx(good_suffix,
+                                                               self.pattern))
                 continue
-            shifts.append(j + 1 - rightmost_occurrence)  # always positive
-        shifts.append(1)  # shift 1 if rightmost character mismatches (no good suffix)
-        return shifts
+            shifts.append(j + 1 - rightmost_occ)
+        shifts.append(1)  # if mismatch at last index (no good suffix)
+        return shifts  # list containing ints > 0
 
-    # okay
-    def _rightmost_start_of_substr(self, subpattern, pattern):
-        """Returns start index of rightmost occurrence of a substring."""
+    @staticmethod
+    def rightmost_substr_start(subpattern, pattern):
+        """Finds starting index of rightmost occurrence of substring
+        in pattern if existing.
+
+        Args:
+            subpattern (str): Substring that is searched for.
+            pattern (str): String that is searched.
+
+        Returns:
+            int: Starting index of rightmost occurrence if existing,
+                else -1.
+        """
         m = len(subpattern)
         for i in range(len(pattern)-m, -1, -1):  # naive string search
             if subpattern == pattern[i:i+m]:
                 return i
         return -1
 
-    def _start_of_longest_sfx_as_pfx(self, suffix, pattern):
-        """Returns start index of longest suffix which is a prefix of
-        the pattern."""
-        while len(suffix) > 1:  # while True
+    @staticmethod
+    def start_of_longest_sfx_as_pfx(suffix, pattern):
+        """Determines starting index of longest suffix (of suffix) which
+        is also a prefix of the pattern.
+        
+        Args:
+            suffix (str): Suffix of pattern of which the longest suffix
+                is ascertained.
+            pattern (str): String of which the starting index is
+                determined.
+
+        Returns:
+            int: Starting index in the pattern of longest suffix.
+        """
+        while True:
             suffix = suffix[1:]
+            # at the latest fulfilled in case of empty string
             if pattern.startswith(suffix):
                 return len(pattern) - len(suffix)
-        return len(pattern)  # redundant
 
 
 
@@ -173,9 +213,6 @@ class StringMatcher:
 #             k += 1
 #         longest_prefix[q] = k
 #     return longest_prefix
-
-
-
 
 
 if __name__ == "__main__":
