@@ -64,9 +64,15 @@ def command_line_execution(args):
         sm = StringMatcher(args.search[0], case=args.insensitive)
     except EmptyStringException:
         parser.error(sys.exc_info()[1])
+
     search_func = sm.naive if args.naive else sm.boyer_moore
     if args.text:
-        print(search_func(args.text[0]))
+        indices = search_func(args.text[0])
+        if indices:
+            print(f"Found at indices: {', '.join([str(i) for i in indices])}")
+        else:
+            print("No occurrences found.")
+
     elif args.file:
         try:
             positions = sm.search_file(args.file[0], encoding=args.encoding[0],
@@ -76,6 +82,7 @@ def command_line_execution(args):
         print(_prettify_file_output(positions))
         if not positions:
             print("No occurrences found.")
+
     elif args.dir:
         try:
             locations = sm.search_dir(args.dir[0], encoding=args.encoding[0],
@@ -86,6 +93,7 @@ def command_line_execution(args):
             print(f"{doc}:\n{_prettify_file_output(positions)}")
         if not locations:
             print("No occurrences found.")
+
     else:
         parser.error("Missing argument: '--text STRING' OR '--file FILE' OR"
                      " '--dir DIR'\n"
