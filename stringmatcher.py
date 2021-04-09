@@ -110,6 +110,8 @@ class StringMatcher:
             file (str): Path to the file which is to be searched for
                 a particular string.
             encoding (str): File encoding. Defaults to utf-8.
+            naive (bool): Naive search algorithm is used if True, else
+                BM algorithm. Defaults to False.
 
         Returns:
             list: Contains 2-tuples consisting of a line number and a
@@ -144,7 +146,7 @@ class StringMatcher:
             encoding (str): Encoding of the files in the directory.
                 Defaults to utf-8.
             naive (bool): Naive search algorithm is used if True, else
-                BM algorithm.
+                BM algorithm. Defaults to False.
 
         Returns:
             dict: Each key is a filename and each value a list of
