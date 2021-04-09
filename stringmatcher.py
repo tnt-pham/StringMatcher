@@ -50,7 +50,7 @@ class StringMatcher:
             pattern = pattern.lower()
         self._pattern = pattern
         self._bad_char_heuristic = self._rightmost_index_table(pattern)
-        self._good_suffix_heuristic = self._good_suffix_shifts()
+        self._good_suffix_heuristic = self._good_suffix_shifts(pattern)
         self.case = case
 
     def naive(self, text):
@@ -74,9 +74,9 @@ class StringMatcher:
     def boyer_moore(self, text):
         """Boyer-Moore (BM) string matching algorithm according to the
         description by Cormen et al. (1990). In contrast to the naive
-        algorithm, this BM algorithm makes use of the pattern's
-        inner patterns/structure to skip shifts and reduce the number of
-        comparisons to be made.
+        algorithm, this BM algorithm reads the pattern from right to
+        left and makes use of the pattern's inner structure to skip
+        shifts and reduce the number of comparisons to be made.
 
         Args:
             text (str): Text that is searched for a pattern.
@@ -84,6 +84,8 @@ class StringMatcher:
         Returns:
             list: Contains the indices of the pattern's occurrences.
         """
+        if not self.case:
+            text = text.lower()
         m = len(self._pattern)
         shift = 0
         positions = []
@@ -190,23 +192,27 @@ class StringMatcher:
             char_index_table[pattern[j]] = j
         return char_index_table
 
-    def _good_suffix_shifts(self):
+    def _good_suffix_shifts(self, pattern):
         """Maps mismatch index to number of shifts that can be made
         without missing possible alignments of the already matching
         suffix (= good suffix).
+
+        Args:
+            pattern (str): String of which the possible shifts are
+                calculated, depending on the index of the mismatch.
 
         Returns:
             list: Contains integer > 0.
         """
         shifts = []
-        m = len(self._pattern)
+        m = len(pattern)
         for j in range(m - 1):
-            good_suffix = self._pattern[j+1:]  # at least one character
+            good_suffix = pattern[j+1:]  # at least one character
             rightmost_occ = self._rightmost_substr_start(good_suffix,
-                                                         self._pattern[:-1])
+                                                         pattern[:-1])
             if rightmost_occ == -1:  # not found
                 shifts.append(self._start_of_longest_sfx_as_pfx(good_suffix,
-                                                                self._pattern))
+                                                                pattern))
             else:
                 shifts.append(j + 1 - rightmost_occ)
         shifts.append(1)  # if mismatch at last index (no good suffix)
