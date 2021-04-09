@@ -69,7 +69,8 @@ def command_line_execution(args):
         print(search_func(args.text[0]))
     elif args.file:
         try:
-            positions = sm.search_file(args.file[0], encoding=args.encoding[0], naive=args.naive)
+            positions = sm.search_file(args.file[0], encoding=args.encoding[0],
+                                       naive=args.naive)
         except (FileNotFoundError, PermissionError):
             parser.error(sys.exc_info()[1])
         print(_prettify_file_output(positions))
@@ -77,7 +78,8 @@ def command_line_execution(args):
             print("No occurrences found.")
     elif args.dir:
         try:
-            locations = sm.search_dir(args.dir[0], encoding=args.encoding[0], naive=args.naive)
+            locations = sm.search_dir(args.dir[0], encoding=args.encoding[0],
+                                      naive=args.naive)
         except (FileNotFoundError, NotADirectoryError):
             parser.error(sys.exc_info()[1])
         for doc, positions in locations.items():
