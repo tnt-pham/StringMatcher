@@ -1,0 +1,8 @@
+The Meaning of Life
+
+This is one of the big questions humankind has posed to itself but yet not have answered. What am I talking about? Some people like to look for crazy patterns. Like here: ababab abab abab baba
+This is another line. What could one possibly look for? Are people looking for patterns like this: baba ab ab aaa? Or rather bab bab aba?
+
+Now, let's talk about "affect versus effect"! Why? Well, there are reoccurring patterns which are interesting to the Boyer-Moore algorithm.
+
+To sum up, evaluation in NLP is a field on its own and deserves more attention.

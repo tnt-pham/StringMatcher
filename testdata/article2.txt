@@ -1,0 +1,6 @@
+
+These are letters. Certainly these are read by people.
+
+I will just put some random patterns here: abooabab ab bab ababa
+
+To conclude this amazing story: We need more appropriate metrics for the evaluation on NLP systems.

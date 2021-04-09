@@ -243,8 +243,24 @@ class StringMatcher:
 
 
 if __name__ == "__main__":
-    pattern = "holala"
-    text = "he holala hallo hola hola hola\n ha holalalahohos hola hola holala"
-    sm = StringMatcher(pattern)
-    print(sm.naive(text))
-    print(sm.boyer_moore(text))
+    print("######################## INITIALIZE DEMO #########################")
+    pattern1 = "TGA"
+    pattern2 = "evaluation"
+    text = "TGATCTGATAGATTACA ACTACGTGATAG TGATTA"
+    dir_path = "testdata"
+    file_path = os.path.join(dir_path, "article1.txt")
+    print('')
+    print("########## Find occurrences in a string ##########")
+    sm1 = StringMatcher(pattern1)
+    print(f"Let us find the starting indices of '{pattern1}' in this\n" +
+          "DNA sequence!")
+    print(f">>> text = '{text}'")
+    print(f">>> sm1 = StringMatcher('{pattern1}')")
+    print(f">>> print(sm1.naive(text))")
+    print(sm1.naive(text))
+    print(f">>> print(sm1.boyer_moore(text))")
+    print(sm1.boyer_moore(text))
+    print('')
+    print("########## Find occurrences in one file ##########")
+    print(f"Let us find the positions of '{pattern2}' in a txt-file:")
+    print(f">>> file_path = '{file_path}'")
