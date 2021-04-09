@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Thomas N. T. Pham (nhpham@uni-potsdam.de)
-# 08-Apr-2021
+# 09-Apr-2021
 # Python 3.7
 # Windows 10
 """String matching tool."""
@@ -316,3 +316,6 @@ if __name__ == "__main__":
     print("If preferred, the naive algorithm can also be used of course!")
     print(">>> print(sm2.search_dir(dir_path, encoding='utf-8', naive=True))")
     print(sm2.search_dir(dir_path, encoding="utf-8", naive=True))
+    print('')
+    print("For more information please take a look at the Readme. Have fun!")
+    print("############################ END DEMO ############################")
