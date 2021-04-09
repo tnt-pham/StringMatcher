@@ -105,15 +105,14 @@ class StringMatcher:
                 list of positions (int) in that line, e.g. for findings
                 in line 2 and 56: [(2, [23, 41, 75]), (56, [45])].
         """
+        search_func = self.naive if naive else self.boyer_moore
         line_positions = []
         try:
             with open(file, 'r', encoding=encoding) as read_f:
-                if naive:
-                    for num, line in enumerate(read_f, start=1):
-                        line_positions.append((num, self.naive(line)))
-                else:  # BM algorithm
-                    for num, line in enumerate(read_f, start=1):
-                        line_positions.append((num, self.boyer_moore(line)))
+                for num, line in enumerate(read_f, start=1):
+                    positions = search_func(line)
+                    if positions:
+                        line_positions.append((num, positions))
             return line_positions
         except FileNotFoundError as fnf:
             fnf_msg = file + " does not exist. Valid file path needed."
@@ -253,7 +252,7 @@ if __name__ == "__main__":
     print("########## Find occurrences in a string ##########")
     sm1 = StringMatcher(pattern1)
     print(f"Let us find the starting indices of '{pattern1}' in this\n" +
-          "DNA sequence!")
+          "DNA sequence, using the naive as well as the Boyer-Moore algorithm")
     print(f">>> text = '{text}'")
     print(f">>> sm1 = StringMatcher('{pattern1}')")
     print(f">>> print(sm1.naive(text))")
@@ -264,3 +263,9 @@ if __name__ == "__main__":
     print("########## Find occurrences in one file ##########")
     print(f"Let us find the positions of '{pattern2}' in a txt-file:")
     print(f">>> file_path = '{file_path}'")
+    sm2 = StringMatcher(pattern2)
+    print(sm2.search_file(file_path, encoding="utf-8", naive=False))
+    print(sm2.search_file(file_path, encoding="utf-8", naive=True))
+
+
+
