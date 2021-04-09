@@ -6,3 +6,4 @@ This is another line. What could one possibly look for? Are people looking for p
 Now, let's talk about "affect versus effect"! Why? Well, there are reoccurring patterns which are interesting to the Boyer-Moore algorithm.
 
 To sum up, evaluation in NLP is a field on its own and deserves more attention.
+Evaluation, evaluation, evaluation!
