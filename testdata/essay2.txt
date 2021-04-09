@@ -2,5 +2,3 @@
 These are letters. Certainly these are read by people.
 
 I will just put some random patterns here: bip-bup-biiiip (imagine a robot saying this)
-
-To conclude this amazing story: We need more appropriate metrics for the evaluation on NLP systems.

@@ -4,10 +4,11 @@ The difference between 'affect and effect'
 1.1 affect versus effect
 Here is some text which is read by people like you and me. Maybe you are actually interested in the answer: https://www.merriam-webster.com/words-at-play/affect-vs-effect-usage-difference
 
-1.2 another paragraph
-We could look for more evaluation metrics.
+1.2 another section
+another paragraph.
 
 2.0 Evaluation in NLP
 
 2.1 BLEU score
 Can you believe that BLEU is already about 19 years old? Isn't it crazy that a lot of people use this metric without any second thoughts although its inappropriateness has been shown?
+To conclude this amazing story: We need more appropriate metrics for the evaluation of NLP systems.
