@@ -55,30 +55,50 @@ def configure_parser():
 
 
 def command_line_execution(args):
-    if args.search:
+    """Manages interaction between command-line and StringMatcher."""
+    if args.search is None:
+        parser.error("Missing argument: --search SEARCHSTRING\n"
+                     "Please specify the string you want to look for."
+                     " You may find help with '--help'.")
+    try:
+        sm = StringMatcher(args.search[0], case=args.insensitive)
+    except EmptyStringException:
+        parser.error(sys.exc_info()[1])
+    search_func = sm.naive if args.naive else sm.boyer_moore
+    if args.text:
+        print(search_func(args.text[0]))
+    elif args.file:
         try:
-            sm = StringMatcher(args.search[0], case=args.insensitive)
-        except EmptyStringException:
+            positions = sm.search_file(args.file[0], encoding=args.encoding[0], naive=args.naive)
+        except (FileNotFoundError, PermissionError):
             parser.error(sys.exc_info()[1])
-        search_func = sm.naive if args.naive else sm.boyer_moore
-        if args.text:
-            print(search_func(args.text[0]))
-        elif args.file:
-            try:
-                print(sm.search_file(args.file[0], encoding=args.encoding[0], naive=args.naive))
-            except (FileNotFoundError, PermissionError):
-                parser.error(sys.exc_info()[1])
-        elif args.dir:
-            try:
-                print(sm.search_dir(args.dir[0], encoding=args.encoding[0], naive=args.naive))
-            except (FileNotFoundError, NotADirectoryError):
-                parser.error(sys.exc_info()[1])
-        else:
-            print("Please choose between '--text', '--file' and '--dir',"
-                  " depending on where you want to look for the string.")
+        print(_prettify_file_output(positions))
+        if not positions:
+            print("No occurrences found.")
+    elif args.dir:
+        try:
+            locations = sm.search_dir(args.dir[0], encoding=args.encoding[0], naive=args.naive)
+        except (FileNotFoundError, NotADirectoryError):
+            parser.error(sys.exc_info()[1])
+        for doc, positions in locations.items():
+            print(f"{doc}:\n{_prettify_file_output(positions)}")
+        if not locations:
+            print("No occurrences found.")
     else:
-        print("Please specify the string you want to look for with"
-              " '--search'. You may find help with '--help'.")
+        parser.error("Missing argument: '--text STRING' OR '--file FILE' OR"
+                     " '--dir DIR'\n"
+                     "Please choose depending on where you want to look"
+                     " for the string.")
+
+
+def _prettify_file_output(positions):
+    """Prettifies output string in commandline for lists containing
+    2-tuples of line number and a list of indices.
+    """
+    output = ""
+    for line, shifts in positions:
+        output += f"line {line}: {', '.join([str(i) for i in shifts])}\n"
+    return output
 
 
 if __name__ == "__main__":
