@@ -25,6 +25,8 @@ class StringMatcher:
 
     Args:
         pattern (str): String that is searched for.
+        case (bool): Case-sensitive string search if True,
+            else case-insensitive.
 
     Attributes:
         pattern (str): String that is searched for.
@@ -35,16 +37,21 @@ class StringMatcher:
             number of shifts that can be made, on the basis of an
             already matching suffix (= good suffix), without missing
             possible alignments.
+        case (bool): Case-sensitive string search if True,
+            else case-insensitive.
     """
-    def __init__(self, pattern):
+    def __init__(self, pattern, case=True):
         if len(pattern) == 0:
             raise EmptyStringException("Invalid search string. Empty" +
                                        " strings are everywhere." +
                                        " Please try something with" +
                                        " characters.")
+        if not case:
+            pattern = pattern.lower()
         self._pattern = pattern
         self._bad_char_heuristic = self._rightmost_index_table(pattern)
         self._good_suffix_heuristic = self._good_suffix_shifts()
+        self.case = case
 
     def naive(self, text):
         """Naive string matching algorithm (brute force).
@@ -55,6 +62,8 @@ class StringMatcher:
         Returns:
             list: Contains the indices of the pattern's occurrences.
         """
+        if not self.case:
+            text = text.lower()
         m = len(self._pattern)
         positions = []
         for shift in range(len(text) - m + 1):
@@ -185,12 +194,14 @@ class StringMatcher:
         """Maps mismatch index to number of shifts that can be made
         without missing possible alignments of the already matching
         suffix (= good suffix).
+
+        Returns:
+            list: Contains integer > 0.
         """
         shifts = []
         m = len(self._pattern)
         for j in range(m - 1):
             good_suffix = self._pattern[j+1:]  # at least one character
-            # always to the left of j+1
             rightmost_occ = self._rightmost_substr_start(good_suffix,
                                                          self._pattern[:-1])
             if rightmost_occ == -1:  # not found
@@ -199,7 +210,7 @@ class StringMatcher:
             else:
                 shifts.append(j + 1 - rightmost_occ)
         shifts.append(1)  # if mismatch at last index (no good suffix)
-        return shifts  # list containing ints > 0
+        return shifts
 
     @staticmethod
     def _rightmost_substr_start(subpattern, pattern):
@@ -245,7 +256,7 @@ if __name__ == "__main__":
     print("######################## INITIALIZE DEMO #########################")
     pattern1 = "TGA"
     pattern2 = "evaluation"
-    text = "TGATCTGATAGATTACA ACTACGTGATAG TGATTA"
+    text = "TGATCTGATAGATTACAACTACGTGATAGTGATTA"
     dir_path = "testdata"
     file_path = os.path.join(dir_path, "article1.txt")
     print('')
