@@ -168,11 +168,12 @@ class StringMatcher:
             logging.error(nad_msg)
             raise NotADirectoryError(nad_msg).with_traceback(nad.__traceback__)
         for file in tqdm(file_list, desc="search directory...", leave=False):
-            filepath = os.path.join(dir, file)
-            location = self.search_file(filepath, encoding=encoding,
-                                        naive=naive)
-            if location:
-                doc_line_positions[file] = location
+            if file.endswith(".txt"):
+                filepath = os.path.join(dir, file)
+                location = self.search_file(filepath, encoding=encoding,
+                                            naive=naive)
+                if location:
+                    doc_line_positions[file] = location
         return doc_line_positions
 
 # private methods #
