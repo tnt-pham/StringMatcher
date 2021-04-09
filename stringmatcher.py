@@ -165,12 +165,13 @@ class StringMatcher:
             nad_msg = dir + " does not lead to a directory."
             logging.error(nad_msg)
             raise NotADirectoryError(nad_msg).with_traceback(nad.__traceback__)
-        for file in tqdm(file_list, desc="search directory..."):
+        for file in tqdm(file_list, desc="search directory...", leave=False):
             filepath = os.path.join(dir, file)
-            doc_line_positions[file] = self.search_file(filepath,
-                                                        encoding=encoding,
-                                                        naive=naive)
-            return doc_line_positions
+            location = self.search_file(filepath, encoding=encoding,
+                                        naive=naive)
+            if location:
+                doc_line_positions[file] = location
+        return doc_line_positions
 
 # private methods #
     @staticmethod
@@ -262,30 +263,56 @@ if __name__ == "__main__":
     print("######################## INITIALIZE DEMO #########################")
     pattern1 = "TGA"
     pattern2 = "evaluation"
-    text = "TGATCTGATAGATTACAACTACGTGATAGTGATTA"
+    text = "tgaTGATCTGATAGAtaaCTACGTGATAGTGAtga"
     dir_path = "testdata"
-    file_path = os.path.join(dir_path, "article1.txt")
+    file_path = os.path.join(dir_path, "essay1.txt")
     print('')
-    print("########## Find occurrences in a string ##########")
-    sm1 = StringMatcher(pattern1)
-    print(f"Let us find the starting indices of '{pattern1}' in this\n" +
-          "DNA sequence, using the naive as well as the\n" +
-          "Boyer-Moore algorithm:")
+    print("################## Find occurrences in a string ##################")
+    print(f"Let us find the starting indices of '{pattern1}' in this DNA" +
+          " sequence,\nusing the naive as well as the Boyer-Moore algorithm:")
     print(f">>> text = '{text}'")
     print(f">>> sm1 = StringMatcher('{pattern1}')")
-    print(f">>> print(sm1.naive(text))")
+    print(">>> print(sm1.naive(text))")
+    sm1 = StringMatcher(pattern1)
     print(sm1.naive(text))
-    print(f">>> print(sm1.boyer_moore(text))")
+    print(">>> print(sm1.boyer_moore(text))")
     print(sm1.boyer_moore(text))
     print('')
-    print("########## Find occurrences in one file ##########")
-    print(f"Let us find the positions of '{pattern2}' in a txt-file using the Boyer-Moore algorithm:")
+    print("How about a case-insensitive search?")
+    print(f">>> sm_insensitive = StringMatcher('{pattern1}', case=False)")
+    print(">>> print(sm_insensitive.boyer_moore(text))")
+    sm_insensitive = StringMatcher(pattern1, case=False)
+    print(sm_insensitive.boyer_moore(text))
+
+    print('')
+    print("################## Find occurrences in one file ##################")
+    print(f"Let us find the positions of '{pattern2}' in a txt-file, using\n" +
+          "the Boyer-Moore algorithm:")
     print(f">>> file_path = '{file_path}'")
     print(f">>> sm2 = StringMatcher('{pattern2}')")
-    print(f">>> print(sm2.search_file(file_path, encoding='utf-8', naive=False))")
+    print(">>> print(sm2.search_file(file_path, encoding='utf-8'))")
     sm2 = StringMatcher(pattern2)
     print(sm2.search_file(file_path, encoding="utf-8", naive=False))
+    print("Hooray, this means we have occurrences in line 8 at index 11,\n" +
+          "as well as in line 9 at index 12 and 24!")
+    print('')
+    print("How about using the naive algorithm instead?")
+    print(f">>> print(sm2.search_file(file_path, encoding='utf-8'," +
+          " naive=True))")
     print(sm2.search_file(file_path, encoding="utf-8", naive=True))
 
-
-
+    print('')
+    print("########## Find occurrences in all files of a directory ##########")
+    print(f"Let us find the positions of '{pattern2}' in all files of a\n" +
+          "directory using the Boyer-Moore algorithm:")
+    print(f">>> dir_path = '{dir_path}'")
+    print(f">>> sm2 = StringMatcher('{pattern2}')")
+    print(">>> print(sm2.search_dir(dir_path, encoding='utf-8'))")
+    print(sm2.search_dir(dir_path, encoding="utf-8", naive=False))
+    print("Nice, we have found some occurrences in 'essay1.txt' in line 8\n" +
+          "at index 11, in line 9 at index 12 and 24, and in 'paper1.txt'\n" +
+          "in line 14 at index 73.")
+    print('')
+    print("If preferred, the naive algorithm can also be used of course!")
+    print(">>> print(sm2.search_dir(dir_path, encoding='utf-8', naive=True))")
+    print(sm2.search_dir(dir_path, encoding="utf-8", naive=True))
