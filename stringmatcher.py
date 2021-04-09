@@ -297,7 +297,7 @@ if __name__ == "__main__":
           "as well as in line 9 at index 12 and 24!")
     print('')
     print("How about using the naive algorithm instead?")
-    print(f">>> print(sm2.search_file(file_path, encoding='utf-8'," +
+    print(">>> print(sm2.search_file(file_path, encoding='utf-8'," +
           " naive=True))")
     print(sm2.search_file(file_path, encoding="utf-8", naive=True))
 
