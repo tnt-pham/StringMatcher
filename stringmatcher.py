@@ -252,7 +252,8 @@ if __name__ == "__main__":
     print("########## Find occurrences in a string ##########")
     sm1 = StringMatcher(pattern1)
     print(f"Let us find the starting indices of '{pattern1}' in this\n" +
-          "DNA sequence, using the naive as well as the Boyer-Moore algorithm")
+          "DNA sequence, using the naive as well as the\n" +
+          "Boyer-Moore algorithm:")
     print(f">>> text = '{text}'")
     print(f">>> sm1 = StringMatcher('{pattern1}')")
     print(f">>> print(sm1.naive(text))")
@@ -261,8 +262,10 @@ if __name__ == "__main__":
     print(sm1.boyer_moore(text))
     print('')
     print("########## Find occurrences in one file ##########")
-    print(f"Let us find the positions of '{pattern2}' in a txt-file:")
+    print(f"Let us find the positions of '{pattern2}' in a txt-file using the Boyer-Moore algorithm:")
     print(f">>> file_path = '{file_path}'")
+    print(f">>> sm2 = StringMatcher('{pattern2}')")
+    print(f">>> print(sm2.search_file(file_path, encoding='utf-8', naive=False))")
     sm2 = StringMatcher(pattern2)
     print(sm2.search_file(file_path, encoding="utf-8", naive=False))
     print(sm2.search_file(file_path, encoding="utf-8", naive=True))
