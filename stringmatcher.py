@@ -48,6 +48,7 @@ class StringMatcher:
                                        " characters.")
         if not case:
             pattern = pattern.lower()
+
         self._pattern = pattern
         self._bad_char_heuristic = self._rightmost_index_table(pattern)
         self._good_suffix_heuristic = self._good_suffix_shifts(pattern)
