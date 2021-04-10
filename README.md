@@ -13,7 +13,7 @@ This command line tool uses the Boyer-Moore algorithm, which tends to be faster 
 - install dependencies (make sure you are located in the root directory when executing the following command)  
 > python -m pip install -r requirements.txt  
 - alternatively: `python -m pip install tqdm`
-- a text, a text file or a directory with txt-files of your choice to search in
+- a text, a text file or a directory with txt-files of your choice that is searched
 
 ## SYNOPSIS
 - show command line syntax and more information on arguments
@@ -45,7 +45,7 @@ This command line tool uses the Boyer-Moore algorithm, which tends to be faster 
 ### ARGUMENTS
 - SEARCHSTRING
     - pattern that is to be searched
-    - should not contain newline characters (otherwise no occurrences)
+    - should not contain newline characters when searching a file or directory (otherwise no occurrences)
 - STRING
     - text that is searched for the search pattern
 - FILE
