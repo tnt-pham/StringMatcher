@@ -55,7 +55,7 @@ def configure_parser():
 
 
 def command_line_execution(args):
-    """Manages interaction between command-line and StringMatcher."""
+    """Manages interaction between command line and StringMatcher."""
     if args.search is None:
         parser.error("Missing argument: --search SEARCHSTRING\n"
                      "Please specify the string you want to look for."
@@ -102,7 +102,7 @@ def command_line_execution(args):
 
 
 def _prettify_file_output(positions):
-    """Prettifies output string in commandline for lists containing
+    """Prettifies output string in command line for lists containing
     2-tuples of line number and a list of indices.
     """
     output = ""
