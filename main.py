@@ -77,7 +77,7 @@ def command_line_execution(args):
         try:
             positions = sm.search_file(args.file[0], encoding=args.encoding[0],
                                        naive=args.naive)
-        except (FileNotFoundError, PermissionError):
+        except (FileNotFoundError, PermissionError, UnicodeDecodeError):
             parser.error(sys.exc_info()[1])
         print(_prettify_file_output(positions))
         if not positions:
