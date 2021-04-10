@@ -29,7 +29,7 @@ def configure_parser():
     group.add_argument("-f", "--file",
                        nargs=1,
                        metavar="FILE",
-                       help="Search in a file.")
+                       help="Search in a text file.")
     group.add_argument("-d", "--dir",
                        nargs=1,
                        metavar="DIR",
