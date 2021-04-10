@@ -138,7 +138,7 @@ class StringMatcher:
             raise FileNotFoundError(pe_msg).with_traceback(pe.__traceback__)
         except UnicodeDecodeError as ud:
             ud_msg = (f"{encoding} codec not proper for '{file}'." +
-                       " Make sure it is a plain text file.")
+                      " Make sure it is a plain text file.")
             logging.error(ud_msg)
             raise UnicodeDecodeError(ud.encoding, ud.object, ud.start, ud.end,
                                      ud_msg).with_traceback(ud.__traceback__)
