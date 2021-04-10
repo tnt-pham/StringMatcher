@@ -52,7 +52,7 @@ class StringMatcher:
         self._pattern = pattern
         self._bad_char_heuristic = self._rightmost_index_table(pattern)
         self._good_suffix_heuristic = self._good_suffix_shifts(pattern)
-        self.case = case
+        self._case = case
 
     def naive(self, text):
         """Naive string matching algorithm (brute force).
@@ -63,7 +63,7 @@ class StringMatcher:
         Returns:
             list: Contains the indices of the pattern's occurrences.
         """
-        if not self.case:
+        if not self._case:
             text = text.lower()
         m = len(self._pattern)
         positions = []
@@ -85,7 +85,7 @@ class StringMatcher:
         Returns:
             list: Contains the indices of the pattern's occurrences.
         """
-        if not self.case:
+        if not self._case:
             text = text.lower()
         m = len(self._pattern)
         shift = 0
