@@ -137,13 +137,13 @@ class StringMatcher:
             raise FileNotFoundError(pe_msg).with_traceback(pe.__traceback__)
 
     def search_dir(self, dir, encoding="utf-8", naive=False):
-        """Searches every file in a directory for occurrences of a
+        """Searches every txt-file in a directory for occurrences of a
         string.
 
         Args:
             dir (str): Path to the directory of which every containing
-                file is searched for a particular string.
-            encoding (str): Encoding of the files in the directory.
+                txt-file is searched for a particular string.
+            encoding (str): Encoding of the txt-files in the directory.
                 Defaults to utf-8.
             naive (bool): Naive search algorithm is used if True, else
                 BM algorithm. Defaults to False.
@@ -305,9 +305,9 @@ if __name__ == "__main__":
     print(sm2.search_file(file_path, encoding="utf-8", naive=True))
 
     print('')
-    print("########## Find occurrences in all files of a directory ##########")
-    print(f"Let us find the positions of '{pattern2}' in all files of a\n" +
-          "directory using the Boyer-Moore algorithm:")
+    print("######## Find occurrences in all txt-files of a directory ########")
+    print(f"Let us find the positions of '{pattern2}' in all txt-files\n" +
+          "of a directory using the Boyer-Moore algorithm:")
     print(f">>> dir_path = '{dir_path}'")
     print(f">>> sm2 = StringMatcher('{pattern2}')")
     print(">>> print(sm2.search_dir(dir_path, encoding='utf-8'))")

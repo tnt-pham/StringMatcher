@@ -33,7 +33,7 @@ def configure_parser():
     group.add_argument("-d", "--dir",
                        nargs=1,
                        metavar="DIR",
-                       help="Search in a directory.")
+                       help="Search all txt-files in a directory.")
 
     parser.add_argument("--search",
                         nargs=1,
