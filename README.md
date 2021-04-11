@@ -9,6 +9,8 @@ String matching is a task that is encountered often and in various fields. Be it
 
 This command line tool uses the Boyer-Moore algorithm, which tends to be faster the longer the search string and the larger the alphabet is, but the naive algorithm is implemented as well and can be chosen if wanted. The program provides the means to search for a string (= concatenation of characters) in a text, in a text file or in all txt-files of a directory and returns the positions of the occurrences, e.g. the starting indices if a text is searched. Additionally, a case-insensitive search is also possible. However, be aware of the limitation that in files, no search strings that exceed more than one line can be found since the text is read line by line. Hence, the search string should not contain any newline characters when searching a file or directory.
 
+Keep in mind that line numbers in files start at 1 while the column indices start at 0.
+
 ##  REQUIREMENTS
 - install dependencies (make sure you are located in the project's root directory when executing the following command)  
 > python -m pip install -r requirements.txt  
@@ -48,13 +50,13 @@ This command line tool uses the Boyer-Moore algorithm, which tends to be faster 
     - should not contain newline characters when searching a file or directory (otherwise no occurrences)
     - regular expressions cannot be used
 - STRING
-    - text that is searched for the search pattern
+    - text that is searched for the search string
 - FILE
     - path to/name of a text file
-    - is searched for the search pattern
+    - is searched for the search string
 - DIR
     - path to/name of a directory
-    - contained txt-files are searched for the search pattern
+    - contained txt-files are searched for the search string
     - contained subdirectories are **not** searched
 - ENC
     - encoding such as `utf-8`, `utf-16`, `utf-32`, `windows-1250`, `big5`, `latin-1`, `ascii`, ...
