@@ -80,9 +80,3 @@ Thomas N. T. Pham
 University of Potsdam, April 2021  
 [My Github](https://github.com/thommy24/StringMatcher)  
 For more information or questions, feel free to contact nhpham@uni-potsdam.de
-
-```sh
-how does this look
-test  
-testest
-```
