@@ -145,7 +145,7 @@ class StringMatcher:
 
     def search_dir(self, dir, encoding="utf-8", naive=False):
         """Searches every txt-file in a directory for occurrences of a
-        string.
+        string. txt-files in subdirectories are excluded.
 
         Args:
             dir (str): Path to the directory of which every containing
