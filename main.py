@@ -17,7 +17,7 @@ def configure_parser():
     """Argument structure configuration for command line."""
     parser = argparse.ArgumentParser(description="String search tool."
                                                  " What are you looking for?",
-                                     epilog="Your logfile"
+                                     epilog="The Readme and your logfile"
                                             " stringmatcher_log.log"
                                             " may also provide some helpful"
                                             " information. Have fun!")
