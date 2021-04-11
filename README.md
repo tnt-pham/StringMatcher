@@ -7,10 +7,10 @@ main.py - command line tool for string search in a string, a file or a directory
 ## DESCRIPTION
 String matching is a task that is encountered often and in various fields. Be it an automatic system identifying plagiarism, biologists searching for a particular DNA sequence or solely a person trying to find a certain word in a text file, there are different application areas and as it happens there are different string matching algorithms as well. Each one has its strengths and weaknesses, but depending on our purpose we can select the most appropriate one.
 
-This command line tool uses the Boyer-Moore algorithm, which tends to be faster the longer the search string and the larger the alphabet is, but the naive algorithm is implemented as well and can be chosen if wanted. The program provides the means to search for a string in a text, in a text file or in all txt-files of a directory and returns the positions of the occurrences, e.g. the starting indices if a text is searched. Additionally, a case-insensitive search is also possible. However, keep in mind of its limitation as of the fact that in files, no search strings that exceed more than one line can be found since the text is read line by line. Hence, the search string should not contain any newline characters when searching a file or directory.
+This command line tool uses the Boyer-Moore algorithm, which tends to be faster the longer the search string and the larger the alphabet is, but the naive algorithm is implemented as well and can be chosen if wanted. The program provides the means to search for a string (= concatenation of characters) in a text, in a text file or in all txt-files of a directory and returns the positions of the occurrences, e.g. the starting indices if a text is searched. Additionally, a case-insensitive search is also possible. However, be aware of the limitation that in files, no search strings that exceed more than one line can be found since the text is read line by line. Hence, the search string should not contain any newline characters when searching a file or directory.
 
 ##  REQUIREMENTS
-- install dependencies (make sure you are located in the root directory when executing the following command)  
+- install dependencies (make sure you are located in the project's root directory when executing the following command)  
 > python -m pip install -r requirements.txt  
 - alternatively: `python -m pip install tqdm`
 - a text, a text file or a directory with txt-files of your choice that is searched
@@ -44,8 +44,9 @@ This command line tool uses the Boyer-Moore algorithm, which tends to be faster 
 
 ### ARGUMENTS
 - SEARCHSTRING
-    - pattern that is to be searched
+    - string (= concatenation of characters) that is to be searched
     - should not contain newline characters when searching a file or directory (otherwise no occurrences)
+    - regular expressions cannot be used
 - STRING
     - text that is searched for the search pattern
 - FILE
@@ -53,13 +54,14 @@ This command line tool uses the Boyer-Moore algorithm, which tends to be faster 
     - is searched for the search pattern
 - DIR
     - path to/name of a directory
-    - containing txt-files are searched for the search pattern
+    - contained txt-files are searched for the search pattern
+    - contained subdirectories are **not** searched
 - ENC
     - encoding such as `utf-8`, `utf-16`, `utf-32`, `windows-1250`, `big5`, `latin-1`, `ascii`, ...
     - defaults to `utf-8`
     - can be specified for FILE or DIR
 - Side note:
-    - make sure to enclose the argument with quotation marks `""` if it contains any whitespaces
+    - make sure to enclose the argument with quotation marks `""`
 
 ### EXAMPLES
 - search in another string  
