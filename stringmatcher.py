@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Thomas N. T. Pham (nhpham@uni-potsdam.de)
-# 09-Apr-2021
+# 12-Apr-2021
 # Python 3.7
 # Windows 10
 """String matching tool."""
