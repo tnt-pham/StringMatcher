@@ -314,7 +314,8 @@ if __name__ == "__main__":
     print('')
     print("######## Find occurrences in all txt-files of a directory ########")
     print(f"Let us find the positions of '{pattern2}' in all txt-files\n" +
-          "of a directory using the Boyer-Moore algorithm:")
+          "of a directory (excluding its subdirectories),\n" +
+          "using the Boyer-Moore algorithm!")
     print(f">>> dir_path = '{dir_path}'")
     print(f">>> sm2 = StringMatcher('{pattern2}')")
     print(">>> print(sm2.search_dir(dir_path, encoding='utf-8'))")
